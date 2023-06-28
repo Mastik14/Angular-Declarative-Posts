@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { map } from 'rxjs';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { BehaviorSubject, combineLatest, map } from 'rxjs';
 import { DeclarativeCategoryService } from 'src/app/services/DeclarativeCategory.service';
 import { DeclarativePostService } from 'src/app/services/DeclarativePost.service';
 
@@ -10,27 +10,29 @@ import { DeclarativePostService } from 'src/app/services/DeclarativePost.service
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DeclarativePostsComponent {
-  selectedCategoryId = '';
+  selectedCategorySubject = new BehaviorSubject<string>('');
+  selectedCategoryAction$ = this.selectedCategorySubject.asObservable();
+
   posts$ = this.postService.postsWithCategory$;
   categories$ = this.categoryService.categories$;
+  selectedCategoryId = '';
 
-  filteredPosts$ = this.posts$.pipe(
-    map((posts) => {
-      return posts.filter((post) =>
-        this.selectedCategoryId
-          ? post.categoryId === this.selectedCategoryId
-          : true
-      );
+  filteredPosts$ = combineLatest([
+    this.posts$,
+    this.selectedCategoryAction$,
+  ]).pipe(
+    map(([posts, selectedCategoryId]) => {
+      return posts.filter((post) => selectedCategoryId ? post.categoryId === selectedCategoryId : true);
     })
   );
 
   constructor(
     private postService: DeclarativePostService,
-    private categoryService: DeclarativeCategoryService,
+    private categoryService: DeclarativeCategoryService
   ) {}
 
   onCategoryChange(event: Event) {
     let selectedCategoryId = (event.target as HTMLSelectElement).value;
-    this.selectedCategoryId = selectedCategoryId;
+    this.selectedCategorySubject.next(selectedCategoryId);
   }
 }
