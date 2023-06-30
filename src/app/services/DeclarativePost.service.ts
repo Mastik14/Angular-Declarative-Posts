@@ -1,6 +1,14 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { combineLatest, forkJoin, Subject, catchError, throwError } from 'rxjs';
+import {
+  combineLatest,
+  forkJoin,
+  Subject,
+  catchError,
+  throwError,
+  shareReplay,
+  share
+} from 'rxjs';
 import { map } from 'rxjs/operators';
 import { IPost } from '../models/IPost';
 import { DeclarativeCategoryService } from './DeclarativeCategory.service';
@@ -11,7 +19,7 @@ import { DeclarativeCategoryService } from './DeclarativeCategory.service';
 export class DeclarativePostService {
   posts$ = this.http
     .get<{ [id: string]: IPost }>(
-      `https://rxjsasdasdasdsa-posts-default-rtdb.firebaseio.com/posts.json`
+      `https://rxjs-posts-default-rtdb.firebaseio.com/posts.json`
     )
     .pipe(
       map((posts) => {
@@ -21,7 +29,8 @@ export class DeclarativePostService {
         }
         return postsData;
       }),
-      catchError(this.handleError)
+      catchError(this.handleError),
+      share()
     );
 
   postsWithCategory$ = combineLatest([
