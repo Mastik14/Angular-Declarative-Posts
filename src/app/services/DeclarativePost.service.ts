@@ -105,6 +105,12 @@ export class DeclarativePostService {
       postDetails$ = this.updatePostToServer(postAction.data);
     }
 
+    if (postAction.action === 'delete') {
+      return this.deletePostToServer(postAction.data).pipe(
+        map((post) => postAction.data)
+      );
+    }
+
     return postDetails$.pipe(
       concatMap((post) =>
         this.categoryService.categories$.pipe(
@@ -118,6 +124,12 @@ export class DeclarativePostService {
           })
         )
       )
+    );
+  }
+
+  deletePostToServer(post: IPost) {
+    return this.http.delete(
+      `https://rxjs-posts-default-rtdb.firebaseio.com/posts/${post.id}.json`
     );
   }
 
@@ -150,6 +162,10 @@ export class DeclarativePostService {
 
   updatePost(post: IPost) {
     this.postCRUDSubject.next({ action: 'update', data: post });
+  }
+
+  deletePost(post: IPost) {
+    this.postCRUDSubject.next({ action: 'delete', data: post });
   }
 
   private selectedPostSubject = new BehaviorSubject<string>('');
