@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { map, mergeMap } from 'rxjs';
+import { Observable, map, mergeMap } from 'rxjs';
 import { IPost } from '../models/IPost';
 import { CategoryService } from './category.service';
 
@@ -13,7 +13,7 @@ export class PostService {
     private categoryService: CategoryService
   ) {}
 
-  getPosts() {
+  public getPosts(): Observable<IPost[]> {
     return this.http
       .get<{ [id: string]: IPost }>(
         `https://rxjs-posts-default-rtdb.firebaseio.com/posts.json`
@@ -29,7 +29,15 @@ export class PostService {
       );
   }
 
-  getPostsWithCategory() {
+  public getPostsWithCategory(): Observable<
+    {
+      categoryName: string | undefined;
+      id?: string | undefined;
+      title: string;
+      categoryId: string;
+      description: string;
+    }[]
+  > {
     return this.getPosts().pipe(
       mergeMap((posts) => {
         return this.categoryService.getCategories().pipe(
@@ -48,7 +56,13 @@ export class PostService {
     );
   }
 
-  addPost(post: IPost) {
+  public addPost(post: IPost): Observable<{
+    id: string;
+    title: string;
+    categoryId: string;
+    description: string;
+    categoryName?: string | undefined;
+  }> {
     return this.http
       .post<{ name: string }>(
         `https://rxjs-posts-default-rtdb.firebaseio.com/posts.json`,

@@ -10,25 +10,31 @@ import { NotificationService } from './services/Notification.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent {
-  title = 'Angular-Declarative-Posts';
-  showLoader$ = this.loaderService.loadingAction$;
-  successMessage$ = this.notificationService.successMessageAction$.pipe(
-    tap((message) => {
-      setTimeout(() => {
-        this.notificationService.clearAllMessages();
-      }, 5000);
-    })
-  );
-  errorMessage$ = this.notificationService.errorMessageAction$.pipe(
-    tap((message) => {
-      setTimeout(() => {
-        this.notificationService.clearAllMessages();
-      }, 5000);
-    })
-  );
-
   constructor(
     private loaderService: LoaderService,
     private notificationService: NotificationService
   ) {}
+
+  title = 'Angular-Declarative-Posts';
+
+  showLoader$ = this.loaderService.loadingAction$;
+  successMessage$ = this.notificationService.successMessageAction$.pipe(
+    tap((message) => {
+      if (message) {
+        setTimeout(() => {
+          this.notificationService.clearAllMessages();
+        }, 5000);
+      }
+    })
+  );
+
+  errorMessage$ = this.notificationService.errorMessageAction$.pipe(
+    tap((message) => {
+      if (message) {
+        setTimeout(() => {
+          this.notificationService.clearAllMessages();
+        }, 5000);
+      }
+    })
+  );
 }

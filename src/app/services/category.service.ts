@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { map } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { ICategory } from '../models/ICategory';
 
 @Injectable({
@@ -9,7 +9,7 @@ import { ICategory } from '../models/ICategory';
 export class CategoryService {
   constructor(private http: HttpClient) {}
 
-  getCategories() {
+  public getCategories(): Observable<ICategory[]> {
     return this.http
       .get<{ [id: string]: ICategory }>(
         `https://rxjs-posts-default-rtdb.firebaseio.com/categories.json`

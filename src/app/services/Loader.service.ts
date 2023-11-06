@@ -8,11 +8,11 @@ export class LoaderService {
   private loadingSubject = new Subject<boolean>();
   loadingAction$ = this.loadingSubject.asObservable();
 
-  showLoader() {
+  public showLoader(): void {
     this.loadingSubject.next(true);
   }
 
-  hideLoader() {
+  public hideLoader(): void {
     this.loadingSubject.next(false);
   }
 }

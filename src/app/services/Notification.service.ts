@@ -11,23 +11,23 @@ export class NotificationService {
   private errorMessageSubject = new Subject<string>();
   errorMessageAction$ = this.errorMessageSubject.asObservable();
 
-  setSuccessMessage(message: string) {
+  public setSuccessMessage(message: string): void {
     this.successMessageSubject.next(message);
   }
 
-  setErrorMessage(message: string) {
+  public setErrorMessage(message: string): void {
     this.errorMessageSubject.next(message);
   }
 
-  clearSuccessMessage() {
+  public clearSuccessMessage(): void {
     this.setSuccessMessage('');
   }
 
-  clearErrorMessage() {
+  public clearErrorMessage(): void {
     this.setErrorMessage('');
   }
 
-  clearAllMessages() {
+  public clearAllMessages(): void {
     this.clearSuccessMessage();
     this.clearErrorMessage();
   }

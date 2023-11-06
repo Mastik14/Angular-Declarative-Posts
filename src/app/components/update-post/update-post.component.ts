@@ -12,6 +12,11 @@ import { DeclarativePostService } from 'src/app/services/DeclarativePost.service
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UpdatePostComponent {
+  constructor(
+    private categoryService: DeclarativeCategoryService,
+    private postService: DeclarativePostService
+  ) {}
+
   postId: string = '';
   postForm = new FormGroup({
     title: new FormControl(''),
@@ -33,16 +38,12 @@ export class UpdatePostComponent {
     })
   );
 
-  constructor(
-    private categoryService: DeclarativeCategoryService,
-    private postService: DeclarativePostService
-  ) {}
-
-  onUpdatePost() {
+  public onUpdatePost(): void {
     let postDetails = {
       ...this.postForm.value,
       id: this.postId,
     };
+
     this.postService.updatePost(postDetails as IPost);
   }
 }

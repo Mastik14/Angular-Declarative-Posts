@@ -2,20 +2,16 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import {
   combineLatest,
-  forkJoin,
   Observable,
   Subject,
   catchError,
   throwError,
   shareReplay,
-  share,
-  delay,
   scan,
   tap,
   BehaviorSubject,
   merge,
   concatMap,
-  of,
 } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { CRUDAction, IPost } from '../models/IPost';
@@ -26,6 +22,12 @@ import { NotificationService } from './Notification.service';
   providedIn: 'root',
 })
 export class DeclarativePostService {
+  constructor(
+    private http: HttpClient,
+    private categoryService: DeclarativeCategoryService,
+    private notificationService: NotificationService
+  ) {}
+
   posts$ = this.http
     .get<{ [id: string]: IPost }>(
       `https://rxjs-posts-default-rtdb.firebaseio.com/posts.json`
@@ -79,10 +81,14 @@ export class DeclarativePostService {
     scan((posts, value) => {
       return this.modifyPosts(posts, value);
     }, [] as IPost[]),
-    shareReplay(1)
+    shareReplay(1),
+    catchError(this.handleError)
   );
 
-  modifyPosts(posts: IPost[], value: IPost[] | CRUDAction<IPost>) {
+  public modifyPosts(
+    posts: IPost[],
+    value: IPost[] | CRUDAction<IPost>
+  ): IPost[] {
     if (!(value instanceof Array)) {
       if (value.action === 'add') {
         return [...posts, value.data];
@@ -103,38 +109,41 @@ export class DeclarativePostService {
     return posts;
   }
 
-  savePosts(postAction: CRUDAction<IPost>) {
+  public savePosts(postAction: CRUDAction<IPost>): Observable<IPost> {
     let postDetails$!: Observable<IPost>;
 
     if (postAction.action === 'add') {
       postDetails$ = this.addPostToServer(postAction.data).pipe(
-        tap((post) => {
+        tap(() => {
           this.notificationService.setSuccessMessage('Post Added Successfully');
           this.postCRUDCompleteSubject.next(true);
-        })
+        }),
+        catchError(this.handleError)
       );
     }
 
     if (postAction.action === 'update') {
       postDetails$ = this.updatePostToServer(postAction.data).pipe(
-        tap((post) => {
+        tap(() => {
           this.notificationService.setSuccessMessage(
             'Post Updated Successfully'
           );
           this.postCRUDCompleteSubject.next(true);
-        })
+        }),
+        catchError(this.handleError)
       );
     }
 
     if (postAction.action === 'delete') {
       return this.deletePostToServer(postAction.data).pipe(
-        tap((post) => {
+        tap(() => {
           this.notificationService.setSuccessMessage(
             'Post Deleted Successfully'
           );
           this.postCRUDCompleteSubject.next(true);
         }),
-        map((post) => postAction.data)
+        map(() => postAction.data),
+        catchError(this.handleError)
       );
     }
 
@@ -154,20 +163,26 @@ export class DeclarativePostService {
     );
   }
 
-  deletePostToServer(post: IPost) {
+  public deletePostToServer(post: IPost): Observable<Object> {
     return this.http.delete(
       `https://rxjs-posts-default-rtdb.firebaseio.com/posts/${post.id}.json`
     );
   }
 
-  updatePostToServer(post: IPost) {
+  public updatePostToServer(post: IPost): Observable<IPost> {
     return this.http.patch<IPost>(
       `https://rxjs-posts-default-rtdb.firebaseio.com/posts/${post.id}.json`,
       post
     );
   }
 
-  addPostToServer(post: IPost) {
+  public addPostToServer(post: IPost): Observable<{
+    id: string;
+    title: string;
+    categoryId: string;
+    description: string;
+    categoryName?: string | undefined;
+  }> {
     return this.http
       .post<{ name: string }>(
         `https://rxjs-posts-default-rtdb.firebaseio.com/posts.json`,
@@ -183,15 +198,15 @@ export class DeclarativePostService {
       );
   }
 
-  addPost(post: IPost) {
+  public addPost(post: IPost): void {
     this.postCRUDSubject.next({ action: 'add', data: post });
   }
 
-  updatePost(post: IPost) {
+  public updatePost(post: IPost): void {
     this.postCRUDSubject.next({ action: 'update', data: post });
   }
 
-  deletePost(post: IPost) {
+  public deletePost(post: IPost): void {
     this.postCRUDSubject.next({ action: 'delete', data: post });
   }
 
@@ -206,17 +221,11 @@ export class DeclarativePostService {
     catchError(this.handleError)
   );
 
-  selectPost(postId: string) {
+  public selectPost(postId: string) {
     this.selectedPostSubject.next(postId);
   }
 
-  constructor(
-    private http: HttpClient,
-    private categoryService: DeclarativeCategoryService,
-    private notificationService: NotificationService
-  ) {}
-
-  handleError(error: Error) {
+  public handleError() {
     return throwError(() => {
       return 'unknown error occurred. Please try again';
     });

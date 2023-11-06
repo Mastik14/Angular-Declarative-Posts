@@ -10,6 +10,8 @@ import { DeclarativePostService } from 'src/app/services/DeclarativePost.service
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SinglePostComponent {
+  constructor(private postService: DeclarativePostService) {}
+
   showUpdatePost = false;
   errorMessageSubject = new BehaviorSubject<string>('');
   errorMessageAction$ = this.errorMessageSubject.asObservable();
@@ -23,13 +25,12 @@ export class SinglePostComponent {
       return EMPTY;
     })
   );
-  constructor(private postService: DeclarativePostService) {}
 
-  onUpdatePost() {
+  public onUpdatePost(): void {
     this.showUpdatePost = true;
   }
 
-  onDeletePost(post: IPost) {
+  public onDeletePost(post: IPost): void {
     if (confirm('R you sure you want to delete?')) {
       this.postService.deletePost(post);
     }

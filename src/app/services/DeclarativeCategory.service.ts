@@ -1,12 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ICategory } from '../models/ICategory';
-import { map, share, shareReplay } from 'rxjs';
+import { map, shareReplay } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class DeclarativeCategoryService {
+  constructor(private http: HttpClient) {}
+
   categories$ = this.http
     .get<{ [id: string]: ICategory }>(
       `https://rxjs-posts-default-rtdb.firebaseio.com/categories.json`
@@ -21,5 +23,4 @@ export class DeclarativeCategoryService {
       }),
       shareReplay()
     );
-  constructor(private http: HttpClient) {}
 }

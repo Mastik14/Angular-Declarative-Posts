@@ -12,13 +12,14 @@ export class PostsComponent implements OnInit, OnDestroy {
   posts: IPost[] = [];
   postsSubscription!: Subscription;
   intervalSubscription!: Subscription;
+
   constructor(private postService: PostService) {}
 
-  ngOnInit(): void {
+  public ngOnInit(): void {
     this.getPosts();
   }
 
-  getPosts() {
+  public getPosts(): void {
     this.intervalSubscription = interval(1000).subscribe({
       next: (data) => {
         console.log(data);
@@ -44,7 +45,7 @@ export class PostsComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnDestroy() {
+  public ngOnDestroy(): void {
     this.postsSubscription && this.postsSubscription.unsubscribe();
     this.intervalSubscription && this.intervalSubscription.unsubscribe();
   }

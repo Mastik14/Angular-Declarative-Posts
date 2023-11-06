@@ -11,7 +11,12 @@ import { LoaderService } from 'src/app/services/Loader.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DeclarativePostsComponent implements OnInit {
-  selectedCategoryId = '';
+  constructor(
+    private postService: DeclarativePostService,
+    private categoryService: DeclarativeCategoryService,
+    private loaderService: LoaderService
+  ) {}
+
   posts$ = this.postService.allPosts$;
   categories$ = this.categoryService.categories$;
 
@@ -22,7 +27,7 @@ export class DeclarativePostsComponent implements OnInit {
     this.posts$,
     this.selectedCategoryAction$,
   ]).pipe(
-    tap((data) => {
+    tap(() => {
       this.loaderService.hideLoader();
     }),
     map(([posts, selectedCategory]) => {
@@ -32,17 +37,11 @@ export class DeclarativePostsComponent implements OnInit {
     })
   );
 
-  constructor(
-    private postService: DeclarativePostService,
-    private categoryService: DeclarativeCategoryService,
-    private loaderService: LoaderService
-  ) {}
-
-  ngOnInit() {
+  public ngOnInit(): void {
     this.loaderService.showLoader();
   }
 
-  onCategoryChange(event: Event) {
+  public onCategoryChange(event: Event): void {
     let selectedCategoryId = (event.target as HTMLSelectElement).value;
     this.selectedCategorySubject.next(selectedCategoryId);
   }

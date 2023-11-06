@@ -38,7 +38,11 @@
           <td>{{ post.description }}</td>
           <td>{{ post.categoryName }}</td>
           <td>
-            <a [routerLink]="['/declarativeposts/edit', post.id]" class="btn btn-warning">Update Post</a>
+            <a
+              [routerLink]="['/declarativeposts/edit', post.id]"
+              class="btn btn-warning"
+              >Update Post</a
+            >
           </td>
         </tr>
       </tbody>
