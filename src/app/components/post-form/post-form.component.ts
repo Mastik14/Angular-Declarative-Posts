@@ -1,8 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
-import { combineLatest, map, tap } from 'rxjs';
-import { IPost } from 'src/app/models/IPost';
+import { ActivatedRoute, Router } from '@angular/router';
+import { combineLatest, map, startWith, tap } from 'rxjs';
 import { DeclarativeCategoryService } from 'src/app/services/DeclarativeCategory.service';
 import { DeclarativePostService } from 'src/app/services/DeclarativePost.service';
 
@@ -42,13 +41,23 @@ export class PostFormComponent implements OnInit {
     })
   );
 
+  notification$ = this.postService.postCRUDCompleteAction$.pipe(
+    startWith(false),
+    tap((message) => {
+      if (message) {
+        this.router.navigateByUrl('/declarativeposts');
+      }
+    })
+  );
+
   categories$ = this.categoryService.categories$;
 
-  vm$ = combineLatest([this.selectedPostId, this.post$]);
+  vm$ = combineLatest([this.selectedPostId, this.post$, this.notification$]);
 
   constructor(
     private categoryService: DeclarativeCategoryService,
     private route: ActivatedRoute,
+    private router: Router,
     private postService: DeclarativePostService
   ) {}
 
@@ -58,11 +67,10 @@ export class PostFormComponent implements OnInit {
     let postDetails: any = this.postForm.value;
 
     if (this.postId) {
-      postDetails = { ...postDetails, id: this.postId};
-
-      this.postService.updatePost(postDetails as IPost);
+      postDetails = { ...postDetails, id: this.postId };
+      this.postService.updatePost(postDetails);
     } else {
-      this.postService.addPost(postDetails as IPost);
+      this.postService.addPost(postDetails);
     }
   }
 }
